@@ -1,4 +1,4 @@
-# D.I.S.H
+# D.I.S.H API
 ## Dining Information Served Here
 
 ---
