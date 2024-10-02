@@ -2,8 +2,8 @@
 ## Dining Information Served Here
 
 ---
-
-Dining Information Served Here (DISH) is a service meant to provide a better menu for Michigan Tech dining halls.
+Backend for Dinner Information Served Here (DISH).  
+Provides a rest API with MTU dinner menus from dineoncampus for quicker access from MTU's campus.
 
 ---
 ### Running
