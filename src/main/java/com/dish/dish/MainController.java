@@ -33,10 +33,11 @@ public class MainController {
     @GetMapping("/endpoints")
     public List<String> listAllEndpoints() {
         return handlerMapping.getHandlerMethods()
-                .keySet()
-                .stream()
-                .map(requestMappingInfo -> requestMappingInfo.toString())
-                .filter(endpoint -> !endpoint.contains("/error")) // Exclude /error endpoint
-                .collect(Collectors.toList());
+            .keySet()
+            .stream()
+            .map(requestMappingInfo -> requestMappingInfo.toString())
+            .filter(endpoint -> !endpoint.contains("/error")) // Exclude /error endpoint
+            .collect(Collectors.toList());
+
     }
 }
