@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS location (
 
 CREATE TABLE IF NOT EXISTS accounts (
     username TEXT NOT NULL,
-    password BLOB NOT NULL,
+    password TEXT NOT NULL,
     uid INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
