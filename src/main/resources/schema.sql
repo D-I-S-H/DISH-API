@@ -1,16 +1,21 @@
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE location (name TEXT PRIMARY KEY, apiuuid CHAR(24));
+CREATE TABLE IF NOT EXISTS location (
+    name TEXT PRIMARY KEY,
+    apiuuid CHAR(24)
+);
 
-CREATE TABLE accounts (
+CREATE TABLE IF NOT EXISTS accounts (
     username TEXT NOT NULL,
     password BLOB NOT NULL,
     uid INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
-CREATE TABLE time(mealTime TEXT PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS time (
+    mealTime TEXT PRIMARY KEY
+);
 
-CREATE TABLE menuItems (
+CREATE TABLE IF NOT EXISTS menuItems (
     name TEXT,
     ingredients TEXT,
     portion TEXT,
