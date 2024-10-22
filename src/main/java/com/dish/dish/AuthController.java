@@ -80,6 +80,11 @@ public class AuthController {
         String username = registerRequest.get("username");
         String password = registerRequest.get("password");
 
+        if (!username.matches("[a-zA-Z0-9]+")) { // Regex to check for alphanumeric characters
+            Map<String, Object> errorData = new HashMap<>();
+            return new ResponseEntity<>(errorData, HttpStatus.BAD_REQUEST); // Return 400 Bad Request
+        }
+
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:Database/dish.db");
              PreparedStatement checkStmt = conn.prepareStatement("SELECT username FROM accounts WHERE username = ?")) {
 
