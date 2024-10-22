@@ -36,7 +36,6 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestParam String username, @RequestParam String password) throws Exception {
-        System.out.println("Username: " + username);
         // Connect to the database
         Connection conn = DriverManager.getConnection("jdbc:sqlite:Database/dish.db");
 
