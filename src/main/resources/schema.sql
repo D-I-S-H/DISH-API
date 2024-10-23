@@ -1,6 +1,6 @@
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS location (
+CREATE TABLE IF NOT EXISTS locations (
     name TEXT PRIMARY KEY,
     apiuuid CHAR(24)
 );
