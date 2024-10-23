@@ -283,4 +283,4 @@ For a given category, a list of all menu items within that category can be acces
   - `sector_icon_id` - number, unknown purpose
   - `custom_icons` - list, usually empty
 - `custom allergens` - probably a string for a comma separated list of allergens
-- `calories` - numeric value of calories for the menu item (presumably at the given portion)
+- `calories` - string of numeric value of calories for the menu item (presumably at the given portion)
