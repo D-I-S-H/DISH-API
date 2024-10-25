@@ -20,12 +20,12 @@ CREATE TABLE IF NOT EXISTS menuItems (
     ingredients TEXT,
     portion TEXT,
     description TEXT,
-    nutrients TEXT,
+    nutrients TEXT, -- JSON Object
     calories INTEGER,
     time TEXT,
     location TEXT,
-    Allergens TEXT,
+    Allergens TEXT, -- Array
     PRIMARY KEY (name, location),
     FOREIGN KEY (time) REFERENCES time(mealTime),
-    FOREIGN KEY (location) REFERENCES location(name)
+    FOREIGN KEY (location) REFERENCES locations(name)
 );
