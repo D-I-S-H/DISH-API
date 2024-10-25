@@ -32,32 +32,31 @@ public class MenuController {
     public List<MenuItem> getMenu(@RequestParam("location") String location) throws Exception {
         String query = "SELECT name, ingredients, portion, description, nutrients, calories, time, location, allergens FROM menuItems WHERE location = ?";
         List<MenuItem> menu = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper(); // Jackson object mapper for JSON parsing
+        ObjectMapper objectMapper = new ObjectMapper();
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setString(1, location); // Set the location parameter
+            stmt.setString(1, location);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     MenuItem item = new MenuItem();
                     item.setName(rs.getString("name"));
-                    item.setIngredients(objectMapper.readValue(rs.getString("ingredients"), Map.class)); // Parse ingredients JSON as Map
+                    item.setIngredients(objectMapper.readValue(rs.getString("ingredients"), Map.class));
                     item.setPortion(rs.getString("portion"));
                     item.setDescription(rs.getString("description"));
-                    item.setNutrients(objectMapper.readValue(rs.getString("nutrients"), Map.class)); // Parse nutrients JSON as Map
+                    item.setNutrients(objectMapper.readValue(rs.getString("nutrients"), Map.class));
                     item.setCalories(rs.getInt("calories"));
                     item.setTime(rs.getString("time"));
                     item.setLocation(rs.getString("location"));
-                    item.setAllergens(objectMapper.readValue(rs.getString("allergens"), List.class)); // Parse allergens JSON as List
+                    item.setAllergens(objectMapper.readValue(rs.getString("allergens"), List.class));
                     menu.add(item);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();  // For debugging during development
-            throw e;  // Consider handling this more gracefully in production
+            e.printStackTrace();  // Debugging purposes
+            throw e;  // TODO - Handle exception
         }
-
         return menu;
     }
 

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS time (
 
 CREATE TABLE IF NOT EXISTS menuItems (
     name TEXT,
-    ingredients TEXT,
+    ingredients TEXT, -- JSON Object
     portion TEXT,
     description TEXT,
     nutrients TEXT, -- JSON Object
