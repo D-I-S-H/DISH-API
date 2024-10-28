@@ -32,9 +32,11 @@ CREATE TABLE IF NOT EXISTS menuItems (
 
 CREATE TABLE IF NOT EXISTS ratings (
 menuItemName TEXT,
+menuItemLocation TEXT,
 accountUsername TEXT,
 rating INTEGER,
 PRIMARY KEY (menuItemName, accountUsername),
 FOREIGN KEY (menuItemName) REFERENCES menuItems(name),
+FOREIGN KEY (menuItemLocation) REFERENCES menuItems(location),
 FOREIGN KEY (accountUsername) REFERENCES accounts(username)
 );
