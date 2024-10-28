@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS locations (
 );
 
 CREATE TABLE IF NOT EXISTS accounts (
-    username TEXT NOT NULL,
+    username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     uid INTEGER PRIMARY KEY AUTOINCREMENT
 );
@@ -28,4 +28,13 @@ CREATE TABLE IF NOT EXISTS menuItems (
     PRIMARY KEY (name, location),
     FOREIGN KEY (time) REFERENCES time(mealTime),
     FOREIGN KEY (location) REFERENCES location(name)
+);
+
+CREATE TABLE IF NOT EXISTS ratings (
+menuItemName TEXT,
+accountUsername TEXT,
+rating INTEGER,
+PRIMARY KEY (menuItemName, accountUsername),
+FOREIGN KEY (menuItemName) REFERENCES menuItems(name),
+FOREIGN KEY (accountUsername) REFERENCES accounts(username)
 );
