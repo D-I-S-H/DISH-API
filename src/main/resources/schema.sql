@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS menuItems (
     calories INTEGER,
     time TEXT,
     location TEXT,
-    Allergens TEXT, -- Array
+    allergens TEXT, -- Array
     PRIMARY KEY (name, location),
     FOREIGN KEY (time) REFERENCES time(mealTime),
     FOREIGN KEY (location) REFERENCES locations(name)
