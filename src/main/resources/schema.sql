@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS accounts (
 );
 
 CREATE TABLE IF NOT EXISTS time (
-    mealTime TEXT PRIMARY KEY
+    mealTime TEXT PRIMARY KEY,
+    apiUUID CHAR(24)
 );
 
 CREATE TABLE IF NOT EXISTS menuItems (

@@ -29,15 +29,22 @@ public class MenuController {
      * @return List of menu items
      */
     @GetMapping
-    public List<MenuItem> getMenu(@RequestParam("location") String location) throws Exception {
-        String query = "SELECT name, ingredients, portion, description, nutrients, calories, time, location, allergens FROM menuItems WHERE location = ?";
+    public List<MenuItem> getMenu(@RequestParam("location") String location, @RequestParam(required = false) String time) throws Exception {
+        String query = "SELECT name, ingredients, portion, description, nutrients, calories, time, location, allergens FROM menuItems WHERE location = ? AND time = ?";
+        if (time==null) { // If time is not specified, get all items for the location
+            query = "SELECT name, ingredients, portion, description, nutrients, calories, time, location, allergens FROM menuItems WHERE location = ?";
+        }
         List<MenuItem> menu = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
+            // Set parameters
             stmt.setString(1, location);
+            if (time!=null) { // If time is specified, set the parameter
+                stmt.setString(2, time);
+            }
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     MenuItem item = new MenuItem();
@@ -82,5 +89,4 @@ public class MenuController {
             }
         }
     }
-
 }
