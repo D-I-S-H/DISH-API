@@ -30,6 +30,7 @@ Provides a REST API with MTU dinner menus from dineoncampus for quicker access f
     ```sh
     ./gradlew bootRun
     ```
+Note: make sure to re-run the java application to regenerate the database before calling chartwells_query.py.
 
 2. **Access the API:**
     - The API will be available at `http://localhost:8080`
