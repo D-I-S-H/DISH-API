@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS menuItems (
     labels TEXT,
     PRIMARY KEY (name, location, time, station),
     FOREIGN KEY (time) REFERENCES time(mealTime),
-    FOREIGN KEY (location) REFERENCES location(name),
+    FOREIGN KEY (location) REFERENCES locations(name),
     FOREIGN KEY (station) references stations(stationName)
 );
 
@@ -88,8 +88,6 @@ INSERT INTO locations(name, apiUUID) VALUES
 ('Wadsworth', '64b9990ec625af0685fb939d'),
 ('McNair', '64a6b628351d5305dde2bc08'),
 ('DHH', '64e3da15e45d430b80c9b981');
-    FOREIGN KEY (location) REFERENCES location(name)
-);
 
 CREATE TABLE IF NOT EXISTS ratings (
     menuItemName TEXT,
