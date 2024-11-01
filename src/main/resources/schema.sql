@@ -17,10 +17,10 @@ CREATE TABLE IF NOT EXISTS time (
 );
 
 CREATE TABLE IF NOT EXISTS stations (
-  stationName TEXT,
-  locationName TEXT,
-  PRIMARY KEY (stationName, locationName),
-  FOREIGN KEY (locationName) REFERENCES locations(name)
+    stationName TEXT,
+    locationName TEXT,
+    PRIMARY KEY (stationName, locationName),
+    FOREIGN KEY (locationName) REFERENCES locations(name)
 );
 
 CREATE TABLE IF NOT EXISTS menuItems (
@@ -33,20 +33,58 @@ CREATE TABLE IF NOT EXISTS menuItems (
     calories INTEGER,
     time TEXT,
     location TEXT,
-    Allergens TEXT,
+    allergens TEXT,
+    labels TEXT,
     PRIMARY KEY (name, location, time, station),
     FOREIGN KEY (time) REFERENCES time(mealTime),
     FOREIGN KEY (location) REFERENCES location(name),
     FOREIGN KEY (station) references stations(stationName)
 );
 
+CREATE TABLE IF NOT EXISTS menuFilters (
+    name TEXT primary key,
+    type TEXT
+);
+
+CREATE TABLE IF NOT EXISTS itemFilterAssociations (
+    itemName TEXT,
+    itemLocation TEXT,
+    itemTime TEXT,
+    itemStation TEXT,
+    filterName TEXT,
+    PRIMARY KEY (itemName, itemLocation, itemTime, itemStation, filterName),
+    FOREIGN KEY (itemName) REFERENCES menuItems(name),
+    FOREIGN KEY (itemLocation) REFERENCES menuItems(location),
+    FOREIGN KEY (itemTime) REFERENCES menuItems(time),
+    FOREIGN KEY (itemStation) REFERENCES menuItems(station),
+    FOREIGN KEY (filterName) REFERENCES menuItems(name)
+);
+
+CREATE TABLE IF NOT EXISTS menuNutrients (
+    name TEXT,
+    value TEXT,
+    uom TEXT,
+    valueNumeric TEXT,
+    PRIMARY KEY (name, value)
+);
+
+CREATE TABLE IF NOT EXISTS itemNutrientAssociations (
+    itemName TEXT,
+    itemLocation TEXT,
+    itemTime TEXT,
+    itemStation TEXT,
+    nutrientName TEXT,
+    nutrientValue TEXT,
+    PRIMARY KEY (itemName, itemLocation, itemTime, itemStation, nutrientName, nutrientValue),
+    FOREIGN KEY (itemName) REFERENCES menuItems(name),
+    FOREIGN KEY (itemLocation) REFERENCES menuItems(location),
+    FOREIGN KEY (itemTime) REFERENCES menuItems(time),
+    FOREIGN KEY (itemStation) REFERENCES menuItems(station),
+    FOREIGN KEY (nutrientName) REFERENCES menuNutrients(name),
+    FOREIGN KEY (nutrientValue) REFERENCES menuNutrients(value)
+);
+
 INSERT INTO locations(name, apiUUID) VALUES
 ('Wadsworth', '64b9990ec625af0685fb939d'),
 ('McNair', '64a6b628351d5305dde2bc08'),
 ('DHH', '64e3da15e45d430b80c9b981');
-
-INSERT INTO time VALUES
-('Breakfast', '66c25f78351d5300dd7d1807'),
-('Lunch', '66c25f78351d5300dd7d17fd'),
-('Dinner', '66c25f78351d5300dd7d1804'),
-('Everyday', '66cf452dc625af06298b134c');
