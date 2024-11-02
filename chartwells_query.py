@@ -36,7 +36,6 @@ def main():
     db_cursor.execute("SELECT * FROM locations")
     rows = db_cursor.fetchall()
     for row in rows:
-        print("DEBUG: " + row[0] + " " + row[1])
         dining_locations[row[0]] = row[1]
 
     for date in dates:
