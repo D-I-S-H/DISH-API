@@ -24,6 +24,12 @@ Provides a REST API with MTU dinner menus from dineoncampus for quicker access f
     ./gradlew build
     ```
 
+#### Building with Docker
+Build and run the Docker image
+```
+docker-compose up --build
+```
+
 ### Running
 
 1. **Run the application:**
