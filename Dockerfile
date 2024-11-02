@@ -1,5 +1,3 @@
-LABEL org.opencontainers.image.description Dining Information Served Here (DISH) Backend API
-
 FROM gradle:7.6.0-jdk17 AS build
 
 WORKDIR /app
