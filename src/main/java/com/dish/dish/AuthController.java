@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class AuthController {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(); // Password encoder
+    private final SecureRandom secureRandom = new SecureRandom(); // For generating random tokens
 
     @Autowired
     private RequestMappingHandlerMapping handlerMapping;
@@ -38,7 +40,7 @@ public class AuthController {
         String password = loginRequest.get("password");
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:Database/dish.db");
-             PreparedStatement stmt = conn.prepareStatement("SELECT password, username, uid FROM accounts WHERE username = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT password, username, uid, token FROM accounts WHERE username = ?")) {
 
             stmt.setString(1, username);
             try (ResultSet rs = stmt.executeQuery()) { // Execute the query and automatically close ResultSet
@@ -49,11 +51,13 @@ public class AuthController {
                     if (verifyPassword(password, storedHashedPassword)) { // If password matches
                         String foundUsername = rs.getString("username");
                         int uid = rs.getInt("uid");
+                        String token = rs.getString("token");
 
                         // Create response data
                         Map<String, Object> userData = new HashMap<>();
                         userData.put("username", foundUsername);
                         userData.put("uid", uid);
+                        userData.put("token", token);
 
                         return new ResponseEntity<>(userData, HttpStatus.OK); // Return success with 200 OK
                     } else { // If password doesn't match
@@ -95,20 +99,23 @@ public class AuthController {
                 }
             }
 
-            // Hash password
+            // Hash password and generate token
             String hashedPassword = hashPassword(password);
+            String token = generateToken();
 
-            // Store new user
+            // Store user
             try (PreparedStatement insertStmt = conn.prepareStatement(
-                    "INSERT INTO accounts (username, password) VALUES (?, ?)")) {
+                    "INSERT INTO accounts (username, password, token) VALUES (?, ?, ?)")) {
                 insertStmt.setString(1, username);
                 insertStmt.setString(2, hashedPassword); // Store hashed password
+                insertStmt.setString(3, token); // Store generated token
                 insertStmt.executeUpdate(); // Execute the insert
             }
 
             // Create response data
             Map<String, Object> userData = new HashMap<>();
             userData.put("username", username);
+            userData.put("token", token);
 
             // Retrieve the uid of the newly created user
             try (PreparedStatement uidStmt = conn.prepareStatement("SELECT uid FROM accounts WHERE username = ?")) {
@@ -144,4 +151,17 @@ public class AuthController {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
+    /**
+     * Generates a random 32-character hex token
+     * @return random token
+     */
+    private String generateToken() {
+        byte[] bytes = new byte[16];
+        secureRandom.nextBytes(bytes);
+        StringBuilder token = new StringBuilder();
+        for (byte b : bytes) {
+            token.append(String.format("%02x", b));
+        }
+        return token.toString();
+    }
 }
