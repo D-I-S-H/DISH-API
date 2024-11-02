@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://ghcr.io/d-i-s-h/
-        username: ${{ secrets.AzureAppService_ContainerUsername_ad37572a625a401f8f9d3214592a5411 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_fd9ca103d7ab4e87b2bdef9148f6a974 }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_9194379b48514f6696aa6faf8c82996e }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_d6efa59a91f44483b708be1e83be92f2 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: ghcr.io/d-i-s-h/${{ secrets.AzureAppService_ContainerUsername_ad37572a625a401f8f9d3214592a5411 }}/d-i-s-h/dish-api:${{ github.sha }}
+        tags: ghcr.io/d-i-s-h/${{ secrets.AzureAppService_ContainerUsername_9194379b48514f6696aa6faf8c82996e }}/d-i-s-h/dish-api:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'dishapi'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_a9120e0396174fef9d4dd5cc624227ed }}
-        images: 'ghcr.io/d-i-s-h/${{ secrets.AzureAppService_ContainerUsername_ad37572a625a401f8f9d3214592a5411 }}/d-i-s-h/dish-api:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_423fcb9cbe83434ea40605e1a552b268 }}
+        images: 'ghcr.io/d-i-s-h/${{ secrets.AzureAppService_ContainerUsername_9194379b48514f6696aa6faf8c82996e }}/d-i-s-h/dish-api:${{ github.sha }}'
