@@ -25,4 +25,6 @@ RUN chmod +x /entrypoint.sh
 
 EXPOSE 8080
 
+RUN mkdir -p /app/Database && chmod -R 777 /app/Database
+
 ENTRYPOINT ["/entrypoint.sh"]
