@@ -9,8 +9,8 @@ headers = {
     'User-Agent': 'Mozilla/5.0'
 }
 
-database_path = "database.db"
-#database_path = "Database/dish.db"
+#database_path = "database.db"
+database_path = "Database/dish.db"
 
 date_today = datetime.now(timezone(timedelta(hours=-4))).strftime('%Y-%m-%d')
 date_tomorrow = (datetime.now(timezone(timedelta(hours=-4))) + timedelta(1)).strftime('%Y-%m-%d')
