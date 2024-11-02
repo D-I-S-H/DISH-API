@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy container app to Azure Web App - dishapi
 
 on:
@@ -22,15 +19,15 @@ jobs:
     - name: Log in to registry
       uses: docker/login-action@v2
       with:
-        registry: https://ghcr.io/d-i-s-h/
-        username: ${{ secrets.AzureAppService_ContainerUsername_5655eabe5f4e43cfa56cac79c8c2a01e }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_96b3178f057f4887b3d01be177f51f2a }}
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: ghcr.io/d-i-s-h/${{ secrets.AzureAppService_ContainerUsername_5655eabe5f4e43cfa56cac79c8c2a01e }}/d-i-s-h/dish-api:${{ github.sha }}
+        tags: ghcr.io/d-i-s-h/dish-api:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -48,4 +45,4 @@ jobs:
         app-name: 'dishapi'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_d114081c9eb04b7d9e88913c0732b59d }}
-        images: 'ghcr.io/d-i-s-h/${{ secrets.AzureAppService_ContainerUsername_5655eabe5f4e43cfa56cac79c8c2a01e }}/d-i-s-h/dish-api:${{ github.sha }}'
+        images: 'ghcr.io/d-i-s-h/dish-api:${{ github.sha }}'
