@@ -1,0 +1,11 @@
+# Ignore Gradle cache
+.gradle
+build
+out
+*.jar
+*.war
+*.zip
+*.log
+*.db
+.idea
+.vscode
