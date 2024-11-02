@@ -25,13 +25,9 @@ Provides a REST API with MTU dinner menus from dineoncampus for quicker access f
     ```
 
 #### Building with Docker
-Build the Docker image
+Build and run the Docker image
 ```
-docker-compose build
-```
-Start the container
-```
-docker-compose up
+docker-compose up --build
 ```
 
 ### Running
