@@ -4,13 +4,12 @@ import com.dish.dish.classes.MenuItem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/menu")
@@ -26,14 +25,14 @@ public class MenuController {
     /**
      * Returns a list of menu items for a given location
      * @param location - location to get menu items for
-     * @param time - optional time to filter menu items
+     * @type GET
      * @return List of menu items
      */
     @GetMapping
     public List<MenuItem> getMenu(@RequestParam("location") String location, @RequestParam(required = false) String time) throws Exception {
-        String query = "SELECT name, ingredients, portion, description, nutrients, calories, time, location, allergens, labels FROM menuItems WHERE location = ? AND time = ?";
-        if (time == null) { // If time is not specified, get all items for the location
-            query = "SELECT name, ingredients, portion, description, nutrients, calories, time, location, allergens, labels FROM menuItems WHERE location = ?";
+        String query = "SELECT name, ingredients, portion, description, nutrients, calories, time, location, allergens FROM menuItems WHERE location = ? AND time = ?";
+        if (time==null) { // If time is not specified, get all items for the location
+            query = "SELECT name, ingredients, portion, description, nutrients, calories, time, location, allergens FROM menuItems WHERE location = ?";
         }
         List<MenuItem> menu = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -43,41 +42,21 @@ public class MenuController {
 
             // Set parameters
             stmt.setString(1, location);
-            if (time != null) { // If time is specified, set the parameter
+            if (time!=null) { // If time is specified, set the parameter
                 stmt.setString(2, time);
             }
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     MenuItem item = new MenuItem();
                     item.setName(rs.getString("name"));
-
-                    // Parse the comma-separated ingredients into a List<String>
-                    String ingredientsString = rs.getString("ingredients");
-                    List<String> ingredients = Arrays.stream(ingredientsString.split(","))
-                            .map(String::trim)
-                            .collect(Collectors.toList());
-                    item.setIngredients(ingredients);
-
+                    item.setIngredients(objectMapper.readValue(rs.getString("ingredients"), Map.class));
                     item.setPortion(rs.getString("portion"));
                     item.setDescription(rs.getString("description"));
-
-                    // Parse nutrients as List<Map<String, String>>
-                    String nutrientsJson = rs.getString("nutrients").replace("'", "\"");
-                    List<Map<String, String>> nutrients = objectMapper.readValue(nutrientsJson, List.class);
-                    item.setNutrients(nutrients);
-
+                    item.setNutrients(objectMapper.readValue(rs.getString("nutrients"), Map.class));
                     item.setCalories(rs.getInt("calories"));
                     item.setTime(rs.getString("time"));
                     item.setLocation(rs.getString("location"));
-
-                    String allergensJson = rs.getString("allergens").replace("'", "\"");
-                    List<String> allergens = objectMapper.readValue(allergensJson, List.class);
-                    item.setAllergens(allergens);
-
-                    String labelsJson = rs.getString("labels").replace("'", "\"");
-                    List<String> labels = objectMapper.readValue(labelsJson, List.class);
-                    item.setLabels(labels);
-
+                    item.setAllergens(objectMapper.readValue(rs.getString("allergens"), List.class));
                     menu.add(item);
                 }
             }
@@ -88,10 +67,13 @@ public class MenuController {
         return menu;
     }
 
+
+
     /**
      * Get specific item from menu
-     * @param item - item to get
+     * @type GET
      * @return Specific item from menu
+     * @param item - item to get
      */
     @GetMapping("/item")
     public String getItem(@RequestParam("item") String item) throws Exception {
@@ -105,6 +87,34 @@ public class MenuController {
                 }
                 return null;
             }
+        }
+    }
+
+    /**
+     * Push rating to database
+     * @type POST
+     * @return Sucess
+     * @param stars rating
+     * @param uid user id
+     * @param menuItemName the item name
+     * @param menuItemLocation the location of the item
+     */
+    @PostMapping("Rating")
+    public boolean rating(@RequestParam("Rating") int stars, int uid, String menuItemName, String menuItemLocation) throws Exception {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO ratings (manuItemName, menuItemLocation, accountUID, rating) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE rating = VALUES(?)")) {
+
+            stmt.setInt(1, stars); // Set parameter
+            stmt.setInt(2, uid); // Set parameter
+            stmt.setInt(5, stars); // Set parameter
+            stmt.setString(3, menuItemName); // Set parameter
+            stmt.setString(4, menuItemLocation); // Set parameter
+            try (ResultSet rs = stmt.executeQuery()) {
+                
+                return true;
+            } 
+            return false;
+            
         }
     }
 }
