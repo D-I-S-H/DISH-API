@@ -3,14 +3,18 @@ import requests
 import json
 from datetime import datetime, timezone, timedelta
 import time
+import os
 
 #used to access the chartwells api from the viewpoint of a user normal
 headers = {
     'User-Agent': 'Mozilla/5.0'
 }
 
-#database_path = "database.db"
-database_path = "Database/dish.db"
+# Conditional to determine if the script is running in a docker container
+if os.getenv("RUNNING_IN_DOCKER") == "true":
+    database_path = "/data/dish.db"
+else:
+    database_path = "Database/dish.db"
 
 date_today = datetime.now(timezone(timedelta(hours=-4))).strftime('%Y-%m-%d')
 date_tomorrow = (datetime.now(timezone(timedelta(hours=-4))) + timedelta(1)).strftime('%Y-%m-%d')
@@ -22,11 +26,18 @@ period_request = "https://api.dineoncampus.com/v1/location/{location}/periods?pl
 #used to grab meal data for a given location, period, and date
 meal_data_request = "https://api.dineoncampus.com/v1/location/{location}/periods/{period}?platform=0&date={date}"
 
-dining_locations = {"Wadsworth":"64b9990ec625af0685fb939d"}#,"McNair":"64a6b628351d5305dde2bc08","DHH":"64e3da15e45d430b80c9b981"}
+dining_locations = {}
 
 def main():
     db_conection = sqlite3.connect(database_path)
     db_cursor = db_conection.cursor()
+
+    # Get locations from database
+    db_cursor.execute("SELECT * FROM locations")
+    rows = db_cursor.fetchall()
+    for row in rows:
+        print("DEBUG: " + row[0] + " " + row[1])
+        dining_locations[row[0]] = row[1]
 
     for date in dates:
         for location in dining_locations:

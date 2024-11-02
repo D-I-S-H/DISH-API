@@ -1,0 +1,1 @@
+0 */2 * * * python3 /app/chartwells_query.py >> /var/log/cron.log 2>&1

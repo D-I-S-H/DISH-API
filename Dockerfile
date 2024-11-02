@@ -1,25 +1,28 @@
 FROM gradle:7.6.0-jdk17 AS build
 
-# Set the working directory 
 WORKDIR /app
-
-# Copy the Gradle configuration and source code
 COPY build.gradle settings.gradle /app/
 COPY src /app/src
-
-# Build the application
 RUN gradle bootJar --no-daemon
 
 FROM eclipse-temurin:17-jdk-alpine
 
-# Set the working directory
+# Install Python and dcron
+RUN apk update && apk add python3 py3-pip dcron py3-requests
+
 WORKDIR /app
 
-# Copy the JAR file from the build stage
+# Copy JAR and Python script
 COPY --from=build /app/build/libs/*.jar app.jar
+COPY chartwells_query.py /app/chartwells_query.py
 
-# Expose port
+# Add crontab file and set permissions
+COPY crontab.txt /etc/crontabs/root
+
+# Make entrypoint executable
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8080
 
-# Rub
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["/entrypoint.sh"]

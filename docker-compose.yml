@@ -11,5 +11,6 @@ services:
     environment:
       SPRING_DATASOURCE_URL: "jdbc:sqlite:/data/dish.db"
       SPRING_PROFILES_ACTIVE: "docker"
+      RUNNING_IN_DOCKER: "true"
     volumes:
       - ./Database:/data
