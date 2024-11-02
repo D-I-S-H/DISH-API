@@ -7,12 +7,22 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag dish-api:$(date +%s)
+      run: docker build . --file Dockerfile --tag ghcr.io/${{ github.repository_owner }}/dish-api:$(date +%s)
+
+    - name: Push the Docker image
+      run: docker push ghcr.io/${{ github.repository_owner }}/dish-api:$(date +%s)
