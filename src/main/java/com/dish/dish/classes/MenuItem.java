@@ -5,10 +5,10 @@ import java.util.Map;
 
 public class MenuItem {
     private String name;
-    private List<String> ingredients; // List of ingredients
+    private List<String> ingredients;
     private String portion;
     private String description;
-    private List<Map<String, String>> nutrients; // Updated to List of Maps for nutrients
+    private List<Map<String, String>> nutrients;
     private int calories;
     private String time;
     private String location;
