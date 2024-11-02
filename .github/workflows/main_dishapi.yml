@@ -3,7 +3,7 @@ name: Build and deploy container app to Azure Web App - dishapi
 on:
   push:
     branches:
-      - main
+      - azure-deployment
   workflow_dispatch:
 
 jobs:
