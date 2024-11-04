@@ -30,7 +30,7 @@ public class RatingController {
      * @param menuItemName the item name
      * @param menuItemLocation the location of the item
      */
-    @PostMapping("Rating")
+    @PostMapping("/rating")
     public void rating(@RequestParam("Rating") int stars, int uid, String menuItemName, String menuItemLocation) throws Exception {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO ratings (manuItemName, menuItemLocation, accountUID, rating) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE rating = VALUES(rating)")) {
