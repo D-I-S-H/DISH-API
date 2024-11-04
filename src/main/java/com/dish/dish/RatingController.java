@@ -31,10 +31,10 @@ public class RatingController {
      * @param menuItemLocation the location of the item
      */
     @PostMapping
-    public ResponseEntity<String> rating(@RequestParam("Rating") int stars,
-                                         @RequestParam("Rating") int uid,
-                                         @RequestParam("Rating") String menuItemName,
-                                         @RequestParam("Rating") String menuItemLocation) throws Exception {
+    public ResponseEntity<String> rating(@RequestParam("stars") int stars,
+                                         @RequestParam("uid") int uid,
+                                         @RequestParam("name") String menuItemName,
+                                         @RequestParam("location") String menuItemLocation) throws Exception {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO ratings (menuItemName, menuItemLocation, accountUID, rating) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE rating = VALUES(rating)")) {
 
