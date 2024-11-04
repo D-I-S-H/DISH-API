@@ -19,6 +19,9 @@ COPY chartwells_query.py /app/chartwells_query.py
 # Add crontab file and set permissions
 COPY crontab.txt /etc/crontabs/root
 
+# Set environment variable for script
+ENV RUNNING_IN_DOCKER=true
+
 # Make entrypoint executable
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

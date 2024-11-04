@@ -4,15 +4,12 @@
 java -jar /app/app.jar &
 
 # Wait until the server starts
-echo "Waiting for the Spring Boot application to start..."
+echo "Waiting for DISH to start..."
 until nc -z localhost 8080; do
   sleep 5
 done
-echo "Application started."
+echo "DISH started."
 
-# Start cron in the background
+# Start cron without `-b` in the foreground
 echo "Starting cron daemon..."
-crond -b
-
-# Keep the container running
-wait -n
+crond -f
