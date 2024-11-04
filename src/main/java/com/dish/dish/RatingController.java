@@ -30,15 +30,18 @@ public class RatingController {
      * @param menuItemName the item name
      * @param menuItemLocation the location of the item
      */
-    @PostMapping("/rating")
-    public void rating(@RequestParam("Rating") int stars, int uid, String menuItemName, String menuItemLocation) throws Exception {
+    @PostMapping
+    public ResponseEntity<String> rating(@RequestParam("Rating") int stars,
+                                         @RequestParam("Rating") int uid,
+                                         @RequestParam("Rating") String menuItemName,
+                                         @RequestParam("Rating") String menuItemLocation) throws Exception {
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("INSERT INTO ratings (manuItemName, menuItemLocation, accountUID, rating) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE rating = VALUES(rating)")) {
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO ratings (menuItemName, menuItemLocation, accountUID, rating) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE rating = VALUES(rating)")) {
 
-            stmt.setInt(1, stars); // Set parameter
-            stmt.setInt(2, uid); // Set parameter
-            stmt.setString(3, menuItemName); // Set parameter
-            stmt.setString(4, menuItemLocation); // Set parameter
+            stmt.setInt(4, stars); // Set parameter
+            stmt.setInt(3, uid); // Set parameter
+            stmt.setString(1, menuItemName); // Set parameter
+            stmt.setString(2, menuItemLocation); // Set parameter
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
                 return ResponseEntity.ok("Rating successfully submitted!");
