@@ -12,6 +12,7 @@ public class MenuItem {
     private int calories;
     private String time;
     private String location;
+    private String date;  // New field for date
     private List<String> allergens;
     private List<String> labels;
 
@@ -39,6 +40,9 @@ public class MenuItem {
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
 
     public List<String> getAllergens() { return allergens; }
     public void setAllergens(List<String> allergens) { this.allergens = allergens; }

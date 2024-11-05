@@ -23,24 +23,25 @@ CREATE TABLE IF NOT EXISTS stations (
     PRIMARY KEY (stationName, locationName),
     FOREIGN KEY (locationName) REFERENCES locations(name)
 );
-
 CREATE TABLE IF NOT EXISTS menuItems (
     name TEXT,
     station TEXT,
     ingredients TEXT,
     portion TEXT,
     description TEXT,
-    nutrients TEXT, -- JSON Object
+    nutrients TEXT,
     calories INTEGER,
+    date TEXT,
     time TEXT,
     location TEXT,
     allergens TEXT,
     labels TEXT,
-    PRIMARY KEY (name, location, time, station),
+    PRIMARY KEY (name, location, date, time, station),
     FOREIGN KEY (time) REFERENCES time(mealTime),
     FOREIGN KEY (location) REFERENCES locations(name),
     FOREIGN KEY (station) references stations(stationName)
 );
+
 
 CREATE TABLE IF NOT EXISTS menuFilters (
     name TEXT primary key,
@@ -50,12 +51,14 @@ CREATE TABLE IF NOT EXISTS menuFilters (
 CREATE TABLE IF NOT EXISTS itemFilterAssociations (
     itemName TEXT,
     itemLocation TEXT,
+    itemDate TEXT,
     itemTime TEXT,
     itemStation TEXT,
     filterName TEXT,
-    PRIMARY KEY (itemName, itemLocation, itemTime, itemStation, filterName),
+    PRIMARY KEY (itemName, itemLocation, itemDate, itemTime, itemStation, filterName),
     FOREIGN KEY (itemName) REFERENCES menuItems(name),
     FOREIGN KEY (itemLocation) REFERENCES menuItems(location),
+    FOREIGN key (itemDate) REFERENCES menuItems(date),
     FOREIGN KEY (itemTime) REFERENCES menuItems(time),
     FOREIGN KEY (itemStation) REFERENCES menuItems(station),
     FOREIGN KEY (filterName) REFERENCES menuItems(name)
@@ -72,13 +75,15 @@ CREATE TABLE IF NOT EXISTS menuNutrients (
 CREATE TABLE IF NOT EXISTS itemNutrientAssociations (
     itemName TEXT,
     itemLocation TEXT,
+    itemDate TEXT,
     itemTime TEXT,
     itemStation TEXT,
     nutrientName TEXT,
     nutrientValue TEXT,
-    PRIMARY KEY (itemName, itemLocation, itemTime, itemStation, nutrientName, nutrientValue),
+    PRIMARY KEY (itemName, itemLocation, itemDate, itemTime, itemStation, nutrientName, nutrientValue),
     FOREIGN KEY (itemName) REFERENCES menuItems(name),
     FOREIGN KEY (itemLocation) REFERENCES menuItems(location),
+    FOREIGN key (itemDate) REFERENCES menuItems(date),
     FOREIGN KEY (itemTime) REFERENCES menuItems(time),
     FOREIGN KEY (itemStation) REFERENCES menuItems(station),
     FOREIGN KEY (nutrientName) REFERENCES menuNutrients(name),
