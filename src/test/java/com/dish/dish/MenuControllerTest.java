@@ -32,7 +32,7 @@ public class MenuControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private DataSource dataSource; // Mock the DataSource
+    private DataSource dataSource;
 
     @MockBean
     private Connection connection;
@@ -48,52 +48,47 @@ public class MenuControllerTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        // Mock the DataSource to return the mocked connection
+        // Mock DataSource and database interactions
         when(dataSource.getConnection()).thenReturn(connection);
-
-        // Mock the PreparedStatement and ResultSet for getMenu method
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
 
-        // Mock the ResultSet for multiple menu items
+        // Mock ResultSet to return two menu items
         when(resultSet.next()).thenReturn(true, true, false);
         when(resultSet.getString("name")).thenReturn("Pasta Salad", "Grilled Chicken Sandwich");
 
-        // Ingredients as a comma-separated string to match schema
+        // Mocking data for other fields
         when(resultSet.getString("ingredients")).thenReturn(
                 "pasta, tomato, olive oil",
                 "chicken breast, whole wheat bun, lettuce, mayonnaise"
         );
-
         when(resultSet.getString("portion")).thenReturn("1 bowl", "1 sandwich");
         when(resultSet.getString("description")).thenReturn(
                 "A healthy pasta salad with fresh tomatoes and olive oil.",
                 "A delicious grilled chicken sandwich with lettuce and mayonnaise."
         );
-
-        // Nutrients as JSON array of objects
         when(resultSet.getString("nutrients")).thenReturn(
                 "[{'name': 'Carbs', 'value': '40g', 'uom': 'g'}, {'name': 'Protein', 'value': '5g', 'uom': 'g'}, {'name': 'Fat', 'value': '2g', 'uom': 'g'}]",
                 "[{'name': 'Carbs', 'value': '30g', 'uom': 'g'}, {'name': 'Protein', 'value': '25g', 'uom': 'g'}, {'name': 'Fat', 'value': '7g', 'uom': 'g'}]"
         );
-
         when(resultSet.getInt("calories")).thenReturn(250, 350);
         when(resultSet.getString("time")).thenReturn("Lunch", "Dinner");
         when(resultSet.getString("location")).thenReturn("Main Dining Hall", "Main Dining Hall");
 
-        // Allergens as JSON array
-        when(resultSet.getString("allergens")).thenReturn("[\"gluten\", \"tomatoes\"]", "[\"gluten\", \"egg\"]");
+        // Mock the new date field
+        when(resultSet.getString("date")).thenReturn("2024-11-04", "2024-11-04");
 
-        // Labels as JSON array
+        when(resultSet.getString("allergens")).thenReturn("[\"gluten\", \"tomatoes\"]", "[\"gluten\", \"egg\"]");
         when(resultSet.getString("labels")).thenReturn("[\"vegan\", \"low-calorie\"]", "[\"high-protein\"]");
     }
 
     @Test
     @WithMockUser
-    void testGetMenu() throws Exception {
+    void testGetMenuWithDate() throws Exception {
         mockMvc.perform(get("/menu")
-                        .param("location", "Main Dining Hall"))
-                .andExpect(status().isOk()) // Expect HTTP 200 OK status
+                        .param("location", "Main Dining Hall")
+                        .param("date", "2024-11-04"))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Pasta Salad"))
                 .andExpect(jsonPath("$[0].portion").value("1 bowl"))
                 .andExpect(jsonPath("$[0].ingredients[0]").value("pasta"))
@@ -105,6 +100,7 @@ public class MenuControllerTest {
                 .andExpect(jsonPath("$[0].calories").value(250))
                 .andExpect(jsonPath("$[0].time").value("Lunch"))
                 .andExpect(jsonPath("$[0].location").value("Main Dining Hall"))
+                .andExpect(jsonPath("$[0].date").value("2024-11-04"))
                 .andExpect(jsonPath("$[0].allergens[0]").value("gluten"))
                 .andExpect(jsonPath("$[0].allergens[1]").value("tomatoes"))
                 .andExpect(jsonPath("$[0].labels[0]").value("vegan"))
@@ -122,6 +118,7 @@ public class MenuControllerTest {
                 .andExpect(jsonPath("$[1].calories").value(350))
                 .andExpect(jsonPath("$[1].time").value("Dinner"))
                 .andExpect(jsonPath("$[1].location").value("Main Dining Hall"))
+                .andExpect(jsonPath("$[1].date").value("2024-11-04"))
                 .andExpect(jsonPath("$[1].allergens[0]").value("gluten"))
                 .andExpect(jsonPath("$[1].allergens[1]").value("egg"))
                 .andExpect(jsonPath("$[1].labels[0]").value("high-protein"));

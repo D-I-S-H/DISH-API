@@ -19,8 +19,9 @@ COPY chartwells_query.py /app/chartwells_query.py
 # Add crontab file and set permissions
 COPY crontab.txt /etc/crontabs/root
 
-# Set environment variable for script
+# Set environment variables
 ENV RUNNING_IN_DOCKER=true
+ENV DATABASE_URL=jdbc:sqlite:/app/Database/dish.db
 
 # Make entrypoint executable
 COPY entrypoint.sh /entrypoint.sh

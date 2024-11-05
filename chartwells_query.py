@@ -20,7 +20,7 @@ else:
 
 date_today = datetime.now(timezone(timedelta(hours=-4))).strftime('%Y-%m-%d')
 date_tomorrow = (datetime.now(timezone(timedelta(hours=-4))) + timedelta(1)).strftime('%Y-%m-%d')
-dates = {"today": date_today}  # , "tomorrow": date_tomorrow}
+dates = {"today": date_today, "tomorrow": date_tomorrow}
 
 # URLs for requests
 period_request = "https://api.dineoncampus.com/v1/location/{location}/periods?platform=0&date={date}"
@@ -45,12 +45,9 @@ def main():
 
     for date in dates:
         for location in dining_locations:
-            print(f"Grabbing periods for {date} {location}")
+            print(f"Grabbing periods for {dates[date]} {location}")  # Using the value of dates[date]
             periods = get_periods(date, location)
 
-            print(periods)
-
-            # db_cursor.executemany("DELETE FROM time WHERE mealTime=:name", periods)
             db_cursor.executemany("INSERT OR REPLACE INTO time VALUES (:name, :UUID)", periods)
 
             for period in periods:
@@ -63,10 +60,11 @@ def main():
                     for station in meal_json["menu"]["periods"]["categories"]:
                         for item in station["items"]:
                             item["time"] = period["name"]
+                            item["date"] = dates[date]
                             item["location"] = location
                             item["station"] = station["name"]
                             item["nutrients_json"] = handle_nutrients(db_cursor, item)
-                            
+
                             allergens_list = []
                             filters_list = []
                             for filter in item["filters"]:
@@ -77,18 +75,18 @@ def main():
                             item["allergens_json"] = str(allergens_list)
                             item["filters_json"] = str(filters_list)
 
-                        db_cursor.executemany("INSERT OR REPLACE INTO menuItems VALUES (:name, :station, :ingredients, :portion, :desc, :nutrients_json, :calories, :time, :location, :allergens_json, :filters_json)", station["items"])
+                        db_cursor.executemany("INSERT OR REPLACE INTO menuItems VALUES (:name, :station, :ingredients, :portion, :desc, :nutrients_json, :calories, :date, :time, :location, :allergens_json, :filters_json)", station["items"])
 
                         for item in station["items"]:
                             db_cursor.executemany("INSERT OR REPLACE INTO menuFilters VALUES (:name, :type)", item["filters"])
                             for filter in item["filters"]:
-                                db_cursor.execute("INSERT OR REPLACE INTO itemFilterAssociations VALUES (?, ?, ?, ?, ?)", [item["name"], item["location"], item["time"], item["station"], filter["name"]])
+                                db_cursor.execute("INSERT OR REPLACE INTO itemFilterAssociations VALUES (?, ?, ?, ?, ?, ?)", [item["name"], item["location"], item["date"], item["time"], item["station"], filter["name"]])
 
-                    db_conection.commit()
+            db_conection.commit()
+
 
 def get_periods(date, location):
     request_string = period_request.format(date=dates[date], location=dining_locations[location])
-    print(request_string)
     try:
         response = session.get(request_string, headers=headers, timeout=30)
         response.raise_for_status()
@@ -116,7 +114,6 @@ def get_periods(date, location):
 
 def get_meal_data(period, date, location):
     request_string = meal_data_request.format(period=period, date=dates[date], location=dining_locations[location])
-    print(request_string)
     try:
         response = session.get(request_string, headers=headers, timeout=30)
         response.raise_for_status()
@@ -147,12 +144,13 @@ def handle_nutrients(db_cursor, item):
         dictionary.update({
             "itemName": item["name"],
             "itemLocation": item["location"],
+            "itemDate": item["date"],
             "itemTime": item["time"],
             "itemStation": item["station"]
         })
         nutrients_association_list.append(dictionary.copy())
     db_cursor.executemany("INSERT OR REPLACE INTO menuNutrients VALUES (:name, :value, :uom, :value_numeric)", item["nutrients"])
-    db_cursor.executemany("INSERT OR REPLACE INTO itemNutrientAssociations VALUES (:itemName, :itemLocation, :itemTime, :itemStation, :name, :value)", nutrients_association_list)
+    db_cursor.executemany("INSERT OR REPLACE INTO itemNutrientAssociations VALUES (:itemName, :itemLocation, :itemDate, :itemTime, :itemStation, :name, :value)", nutrients_association_list)
     return str(nutrients_list)
 
 if __name__ == "__main__":
