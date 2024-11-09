@@ -4,6 +4,34 @@
 Backend for Dinner Information Served Here (DISH).  
 Provides a REST API with MTU dinner menus from dineoncampus for quicker access from MTU's campus. Also provides account handling, and student ratings for individual meals.
 
+## Table of Contents
+
+- [Docker Quickstart](#docker-quickstart)
+  - [Building with Docker Compose](#building-with-docker-compose)
+  - [Building with Docker](#building-with-docker)
+- [Prerequisites](#prerequisites)
+- [Building](#building)
+- [Running](#running)
+- [Testing](#testing)
+
+---
+
+## Docker Quickstart
+
+### Building with Docker Compose
+
+To build and run the Docker image using Docker Compose, use:
+
+```sh
+docker-compose up --build
+```
+
+### Building with Docker
+
+```sh
+docker run -d --name dish-api -p 8080:8080 ghcr.io/d-i-s-h/dish-api:latest
+```
+
 ---
 
 ### Prerequisites
@@ -11,36 +39,41 @@ Provides a REST API with MTU dinner menus from dineoncampus for quicker access f
 - Java 17
 - Gradle
 
-### Building
+## Building
 
-1. **Clone the repository:**
+1. **Clone the Repository**:
+
     ```sh
     git clone git@github.com:D-I-S-H/DISH-API.git
     cd DISH-API
     ```
 
-2. **Build the project using Gradle:**
+2. **Build the Project using Gradle**:
+
     ```sh
     ./gradlew build
     ```
 
-### Running
+## Running
 
-1. **Run the application:**
+1. **Run the Application**:
+
     ```sh
     ./gradlew bootRun
     ```
-Note: make sure to re-run the java application to regenerate the database before calling chartwells_query.py.
 
-2. **Access the API:**
+    > **Note:** Ensure you re-run the Java application to regenerate the database before executing `chartwells_query.py`.
+
+2. **Access the API**:
     - The API will be available at `http://localhost:8080`
 
-### Testing
+## Testing
 
-1. **Run the tests:**
+1. **Run the Tests**:
+
     ```sh
     ./gradlew test
     ```
 
-2. **View test reports:**
-    - Test reports will be generated in `build/reports/tests/test/index.html`
+2. **View Test Reports**:
+    - Test reports are generated at `build/reports/tests/test/index.html`
