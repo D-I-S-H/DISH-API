@@ -12,15 +12,18 @@ headers = {
     'User-Agent': 'Mozilla/5.0'
 }
 
+request_spacing_seconds = 4
+
 # Conditional to determine if the script is running in a Docker container
 if os.getenv("RUNNING_IN_DOCKER") == "true":
     database_path = "/app/Database/dish.db"
 else:
     database_path = "Database/dish.db"
 
+database_path = "database.db"
+
 date_today = datetime.now(timezone(timedelta(hours=-4))).strftime('%Y-%m-%d')
 date_tomorrow = (datetime.now(timezone(timedelta(hours=-4))) + timedelta(1)).strftime('%Y-%m-%d')
-
 dates = {"today":date_today, "tomorrow":date_tomorrow}
 
 # URLs for requests
@@ -60,7 +63,6 @@ def main():
 
                     for station in meal_json["menu"]["periods"]["categories"]:
                         for item in station["items"]:
-                            item["date"] = date
                             item["time"] = period["name"]
                             item["date"] = dates[date]
                             item["location"] = location
@@ -72,6 +74,8 @@ def main():
                             for filter in item["filters"]:
                                 if filter["type"] == "allergen":
                                     allergens_list.append(filter["name"])
+                                elif (filter["name"] == "How Good Friendly"):
+                                    #print("HGF Removed")
                                 else:
                                     filters_list.append(filter["name"])
                             item["allergens_json"] = str(allergens_list)
@@ -85,13 +89,12 @@ def main():
                                 db_cursor.execute("INSERT OR REPLACE INTO itemFilterAssociations VALUES (?, ?, ?, ?, ?, ?)", [item["name"], item["location"], item["date"], item["time"], item["station"], filter["name"]])
             db_conection.commit()
 
-
 def get_periods(date, location):
     request_string = period_request.format(date=dates[date], location=dining_locations[location])
     try:
         response = session.get(request_string, headers=headers, timeout=30)
         response.raise_for_status()
-        time.sleep(6)  # Delay to avoid rate-limiting
+        time.sleep(request_spacing_seconds)  # Delay to avoid rate-limiting
         if response.status_code != 204:
             response_json = response.json()
             period_list = []
@@ -118,7 +121,7 @@ def get_meal_data(period, date, location):
     try:
         response = session.get(request_string, headers=headers, timeout=30)
         response.raise_for_status()
-        time.sleep(6)  # Delay to avoid rate-limiting
+        time.sleep(request_spacing_seconds)  # Delay to avoid rate-limiting
         if response.status_code != 204:
             response_json = response.json()
             return response_json
