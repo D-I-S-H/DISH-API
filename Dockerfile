@@ -10,6 +10,13 @@ FROM eclipse-temurin:17-jdk-alpine
 # Install Python and dcron
 RUN apk update && apk add python3 py3-pip dcron py3-requests
 
+# Set up ssh
+RUN apk add --no-cache openssh && \
+    echo "root:Docker!" | chpasswd && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config && \
+    ssh-keygen -A
+
 WORKDIR /app
 
 # Copy JAR and Python script
