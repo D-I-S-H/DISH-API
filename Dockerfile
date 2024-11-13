@@ -7,11 +7,9 @@ RUN gradle bootJar --no-daemon
 
 FROM eclipse-temurin:17-jdk-alpine
 
-# Install Python and dcron
-RUN apk update && apk add python3 py3-pip dcron py3-requests
-
-# Set up ssh
-RUN apk add --no-cache openssh && \
+# Install Python, dcron, and SSH
+RUN apk update && \
+    apk add python3 py3-pip dcron py3-requests openssh && \
     echo "root:Docker!" | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config && \
@@ -36,6 +34,8 @@ RUN chmod +x /entrypoint.sh
 
 EXPOSE 8080 2222
 
+# Create Database directory with correct permissions
 RUN mkdir -p /app/Database && chmod -R 777 /app/Database
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Start SSH and the application
+CMD /usr/sbin/sshd -D & /entrypoint.sh
