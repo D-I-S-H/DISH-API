@@ -27,7 +27,7 @@ ENV DATABASE_URL=jdbc:sqlite:/app/Database/dish.db
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8080
+EXPOSE 8080 2222
 
 RUN mkdir -p /app/Database && chmod -R 777 /app/Database
 
