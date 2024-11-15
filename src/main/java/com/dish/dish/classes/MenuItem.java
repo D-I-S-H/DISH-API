@@ -12,9 +12,10 @@ public class MenuItem {
     private int calories;
     private String time;
     private String location;
-    private String date;  // New field for date
+    private String date;
     private List<String> allergens;
     private List<String> labels;
+    private String station;
 
     // Getters and setters for each field
     public String getName() { return name; }
@@ -49,4 +50,8 @@ public class MenuItem {
 
     public List<String> getLabels() { return labels; }
     public void setLabels(List<String> labels) { this.labels = labels; }
+
+    public String getStation() { return station; }
+    public void setStation(String station) { this.station = station; }
+
 }
