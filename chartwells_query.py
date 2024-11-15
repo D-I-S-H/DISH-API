@@ -12,6 +12,8 @@ headers = {
     'User-Agent': 'Mozilla/5.0'
 }
 
+request_spacing_seconds = 4
+
 # Conditional to determine if the script is running in a Docker container
 if os.getenv("RUNNING_IN_DOCKER") == "true":
     database_path = "/app/Database/dish.db"
@@ -20,8 +22,7 @@ else:
 
 date_today = datetime.now(timezone(timedelta(hours=-4))).strftime('%Y-%m-%d')
 date_tomorrow = (datetime.now(timezone(timedelta(hours=-4))) + timedelta(1)).strftime('%Y-%m-%d')
-
-dates = {"today":date_today, "tomorrow":date_tomorrow}
+dates = {"today": date_today, "tomorrow": date_tomorrow}
 
 # URLs for requests
 period_request = "https://api.dineoncampus.com/v1/location/{location}/periods?platform=0&date={date}"
@@ -54,35 +55,41 @@ def main():
             for period in periods:
                 meal_json = get_meal_data(period["UUID"], date, location)
                 if meal_json != -1:
+                    station_accumulator = 0
                     for station in meal_json["menu"]["periods"]["categories"]:
                         station["location"] = location
-                    db_cursor.executemany("INSERT OR REPLACE INTO stations VALUES (:name, :location)", meal_json["menu"]["periods"]["categories"])
+                        station["display_order"] = station_accumulator
+                        station_accumulator += 1
+                    db_cursor.executemany("INSERT OR REPLACE INTO stations VALUES (:name, :location, :display_order)", meal_json["menu"]["periods"]["categories"])
 
                     for station in meal_json["menu"]["periods"]["categories"]:
+                        mealItem_accumulator = 0
                         for item in station["items"]:
-                            item["date"] = date
                             item["time"] = period["name"]
                             item["date"] = dates[date]
                             item["location"] = location
                             item["station"] = station["name"]
                             item["nutrients_json"] = handle_nutrients(db_cursor, item)
+                            item["display_order"] = mealItem_accumulator
+                            mealItem_accumulator += 1
 
                             allergens_list = []
                             filters_list = []
                             for filter in item["filters"]:
                                 if filter["type"] == "allergen":
                                     allergens_list.append(filter["name"])
-                                else:
+                                elif (not (filter["name"] == "How Good Friendly")):
                                     filters_list.append(filter["name"])
                             item["allergens_json"] = str(allergens_list)
                             item["filters_json"] = str(filters_list)
 
-                        db_cursor.executemany("INSERT OR REPLACE INTO menuItems VALUES (:name, :station, :ingredients, :portion, :desc, :nutrients_json, :calories, :date, :time, :location, :allergens_json, :filters_json)", station["items"])
+                        db_cursor.executemany("INSERT OR REPLACE INTO menuItems VALUES (:name, :station, :ingredients, :portion, :desc, :nutrients_json, :calories, :date, :time, :location, :allergens_json, :filters_json, :display_order)", station["items"])
 
                         for item in station["items"]:
                             db_cursor.executemany("INSERT OR REPLACE INTO menuFilters VALUES (:name, :type)", item["filters"])
                             for filter in item["filters"]:
                                 db_cursor.execute("INSERT OR REPLACE INTO itemFilterAssociations VALUES (?, ?, ?, ?, ?, ?)", [item["name"], item["location"], item["date"], item["time"], item["station"], filter["name"]])
+
             db_conection.commit()
 
 
@@ -91,7 +98,7 @@ def get_periods(date, location):
     try:
         response = session.get(request_string, headers=headers, timeout=30)
         response.raise_for_status()
-        time.sleep(6)  # Delay to avoid rate-limiting
+        time.sleep(request_spacing_seconds)  # Delay to avoid rate-limiting
         if response.status_code != 204:
             response_json = response.json()
             period_list = []
@@ -118,7 +125,7 @@ def get_meal_data(period, date, location):
     try:
         response = session.get(request_string, headers=headers, timeout=30)
         response.raise_for_status()
-        time.sleep(6)  # Delay to avoid rate-limiting
+        time.sleep(request_spacing_seconds)  # Delay to avoid rate-limiting
         if response.status_code != 204:
             response_json = response.json()
             return response_json

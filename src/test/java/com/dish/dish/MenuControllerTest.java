@@ -80,6 +80,9 @@ public class MenuControllerTest {
 
         when(resultSet.getString("allergens")).thenReturn("[\"gluten\", \"tomatoes\"]", "[\"gluten\", \"egg\"]");
         when(resultSet.getString("labels")).thenReturn("[\"vegan\", \"low-calorie\"]", "[\"high-protein\"]");
+
+        // Mock the station field
+        when(resultSet.getString("station")).thenReturn("Salad Bar", "Grill Station");
     }
 
     @Test
@@ -105,6 +108,7 @@ public class MenuControllerTest {
                 .andExpect(jsonPath("$[0].allergens[1]").value("tomatoes"))
                 .andExpect(jsonPath("$[0].labels[0]").value("vegan"))
                 .andExpect(jsonPath("$[0].labels[1]").value("low-calorie"))
+                .andExpect(jsonPath("$[0].station").value("Salad Bar")) // New station field assertion
 
                 .andExpect(jsonPath("$[1].name").value("Grilled Chicken Sandwich"))
                 .andExpect(jsonPath("$[1].portion").value("1 sandwich"))
@@ -121,7 +125,8 @@ public class MenuControllerTest {
                 .andExpect(jsonPath("$[1].date").value("2024-11-04"))
                 .andExpect(jsonPath("$[1].allergens[0]").value("gluten"))
                 .andExpect(jsonPath("$[1].allergens[1]").value("egg"))
-                .andExpect(jsonPath("$[1].labels[0]").value("high-protein"));
+                .andExpect(jsonPath("$[1].labels[0]").value("high-protein"))
+                .andExpect(jsonPath("$[1].station").value("Grill Station")); // New station field assertion
     }
 
     @Test
