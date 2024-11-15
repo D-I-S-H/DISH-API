@@ -35,16 +35,22 @@ public class MenuController {
             @RequestParam("location") String location,
             @RequestParam(required = false) String time,
             @RequestParam(required = false) String date) throws Exception {
-        String query = "SELECT name, ingredients, portion, description, nutrients, calories, date, time, location, allergens, labels FROM menuItems WHERE location = ?";
+        String query = "SELECT mi.name, mi.ingredients, mi.portion, mi.description, mi.nutrients, mi.calories, mi.date, mi.time, mi.location, mi.allergens, mi.labels, mi.station " +
+                "FROM menuItems mi " +
+                "JOIN stations s ON mi.station = s.stationName AND mi.location = s.locationName " +
+                "WHERE mi.location = ?";
 
         // Modify query based on optional parameters
         if (time != null && date != null) {
-            query += " AND time = ? AND date = ?";
+            query += " AND mi.time = ? AND mi.date = ?";
         } else if (time != null) {
-            query += " AND time = ?";
+            query += " AND mi.time = ?";
         } else if (date != null) {
-            query += " AND date = ?";
+            query += " AND mi.date = ?";
         }
+
+        query += " ORDER BY s.display_order";
+
         List<MenuItem> menu = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -95,6 +101,8 @@ public class MenuController {
                     String labelsJson = rs.getString("labels").replace("'", "\"");
                     List<String> labels = objectMapper.readValue(labelsJson, List.class);
                     item.setLabels(labels);
+
+                    item.setStation(rs.getString("station"));
 
                     menu.add(item);
                 }

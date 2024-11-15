@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS itemNutrientAssociations (
     FOREIGN KEY (nutrientValue) REFERENCES menuNutrients(value)
 );
 
-INSERT INTO locations(name, apiUUID) VALUES
+INSERT OR IGNORE INTO locations(name, apiUUID) VALUES
 ('Wadsworth', '64b9990ec625af0685fb939d'),
 ('McNair', '64a6b628351d5305dde2bc08'),
 ('DHH', '64e3da15e45d430b80c9b981');
