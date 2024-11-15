@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS locations (
 );
 
 CREATE TABLE IF NOT EXISTS accounts (
-    username TEXT UNIQUE NOT NULL,
+    username TEXT NOT NULL,
     password TEXT NOT NULL,
     token TEXT NOT NULL,
     uid INTEGER PRIMARY KEY AUTOINCREMENT

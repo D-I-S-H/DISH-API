@@ -20,7 +20,8 @@ else:
 
 date_today = datetime.now(timezone(timedelta(hours=-4))).strftime('%Y-%m-%d')
 date_tomorrow = (datetime.now(timezone(timedelta(hours=-4))) + timedelta(1)).strftime('%Y-%m-%d')
-dates = {"today": date_today, "tomorrow": date_tomorrow}
+
+dates = {"today":date_today, "tomorrow":date_tomorrow}
 
 # URLs for requests
 period_request = "https://api.dineoncampus.com/v1/location/{location}/periods?platform=0&date={date}"
@@ -59,6 +60,7 @@ def main():
 
                     for station in meal_json["menu"]["periods"]["categories"]:
                         for item in station["items"]:
+                            item["date"] = date
                             item["time"] = period["name"]
                             item["date"] = dates[date]
                             item["location"] = location
@@ -81,7 +83,6 @@ def main():
                             db_cursor.executemany("INSERT OR REPLACE INTO menuFilters VALUES (:name, :type)", item["filters"])
                             for filter in item["filters"]:
                                 db_cursor.execute("INSERT OR REPLACE INTO itemFilterAssociations VALUES (?, ?, ?, ?, ?, ?)", [item["name"], item["location"], item["date"], item["time"], item["station"], filter["name"]])
-
             db_conection.commit()
 
 
