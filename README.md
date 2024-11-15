@@ -1,8 +1,12 @@
 # D.I.S.H API
-## Dining Information Served Here
+## Dining Information Served Here 
+This project provides a REST API with menus for the dining halls at MTU.  
+Data is retrieved from the [dineoncampus](https://dineoncampus.com/) API and automatically curated in order to provide faster access.  
 
-Backend for Dinner Information Served Here (DISH).  
-Provides a REST API with MTU dinner menus from dineoncampus for quicker access from MTU's campus. Also provides account handling, and student ratings for individual meals.
+This project is built alongside the [DISH Frontend](https://github.com/D-I-S-H/DISH-FE), which provides a web interface for the data.
+
+
+
 
 ## Table of Contents
 
@@ -12,6 +16,7 @@ Provides a REST API with MTU dinner menus from dineoncampus for quicker access f
 - [Prerequisites](#prerequisites)
 - [Building](#building)
 - [Running](#running)
+- [Retrieving Data](#retrieving-data)
 - [Testing](#testing)
 
 ---
@@ -37,7 +42,7 @@ docker run -d --name dish-api -p 8080:8080 ghcr.io/d-i-s-h/dish-api:latest
 ### Prerequisites
 
 - Java 17
-- Gradle
+- Python 3
 
 ## Building
 
@@ -66,6 +71,14 @@ docker run -d --name dish-api -p 8080:8080 ghcr.io/d-i-s-h/dish-api:latest
 
 2. **Access the API**:
     - The API will be available at `http://localhost:8080`
+
+## Retrieving Data
+In order to populate the database with the latest data, run the following command:
+
+```sh
+python chartwells_query.py
+```
+
 
 ## Testing
 
