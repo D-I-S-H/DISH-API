@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Start SSH daemon in the background
+/usr/sbin/sshd -D &
+
 # Start the Spring Boot application in the background
 java -jar /app/app.jar &
 
