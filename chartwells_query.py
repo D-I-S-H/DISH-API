@@ -5,10 +5,17 @@ import time
 import os
 from datetime import datetime, timezone, timedelta
 from fake_useragent import UserAgent
-
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 # Initialize scraper to bypass Cloudflare
 scraper = cloudscraper.create_scraper()
 ua = UserAgent()
+
+# Initialize a session with retries
+session = requests.Session()
+retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+session.mount('https://', HTTPAdapter(max_retries=retries))
 
 # Database path
 if os.getenv("RUNNING_IN_DOCKER") == "true":
@@ -19,7 +26,7 @@ else:
 # Date setup
 date_today = datetime.now(timezone(timedelta(hours=-4))).strftime('%Y-%m-%d')
 date_tomorrow = (datetime.now(timezone(timedelta(hours=-4))) + timedelta(1)).strftime('%Y-%m-%d')
-dates = {"today": date_today, "tomorrow": date_tomorrow}
+dates = {"today": date_today}
 
 # API URLs
 period_request = "https://api.dineoncampus.com/v1/location/{location}/periods?platform=0&date={date}"
@@ -44,12 +51,12 @@ def main():
             periods = get_periods(date, location)
             period_data = [{"name": p["name"], "UUID": p["id"]} for p in periods]
             db_cursor.executemany("INSERT OR REPLACE INTO time VALUES (:name, :UUID)", period_data)
-            
+
             for period in period_data:
                 meal_json = get_meal_data(period["UUID"], date, location)
                 if meal_json != -1:
                     process_meal_data(meal_json, period, date, location, db_cursor)
-            
+
             db_connection.commit()
 
 def get_periods(date, location):
@@ -59,11 +66,11 @@ def get_periods(date, location):
         response = scraper.get(request_string, headers=headers, timeout=30)
         response.raise_for_status()
         time.sleep(request_spacing_seconds)
-        
+
         if response.status_code == 200:
             response_json = response.json()
             return response_json.get("periods", [])
-        
+
     except Exception as e:
         print(f"Error fetching periods: {e}")
     return []
@@ -75,16 +82,24 @@ def get_meal_data(period, date, location):
         response = scraper.get(request_string, headers=headers, timeout=30)
         response.raise_for_status()
         time.sleep(request_spacing_seconds)
-        
+
         if response.status_code == 200:
             return response.json()
-        
+
     except Exception as e:
         print(f"Error fetching meal data: {e}")
     return -1
 
 def process_meal_data(meal_json, period, date, location, db_cursor):
     categories = meal_json.get("menu", {}).get("periods", {}).get("categories", [])
+    station_accumulator = 0
+    for category in categories:
+        category["location"] = location
+        category["display_order"] = station_accumulator
+        station_accumulator += 1
+
+    db_cursor.executemany("INSERT OR REPLACE INTO stations VALUES (:name, :location, :display_order)", categories)
+
     for category in categories:
         station_name = category["name"]
         for item in category["items"]:
@@ -95,21 +110,26 @@ def process_meal_data(meal_json, period, date, location, db_cursor):
                 "station": station_name,
                 "nutrients_json": handle_nutrients(db_cursor, item)
             })
-            
+
             allergens_list = [f["name"] for f in item.get("filters", []) if f["type"] == "allergen"]
             labels_list = [f["name"] for f in item.get("filters", []) if f["type"] == "label"]
             item["allergens_json"] = str(allergens_list)
             item["labels_json"] = str(labels_list)
-            
+
             db_cursor.execute("INSERT OR REPLACE INTO menuItems VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (item["name"], station_name, item.get("ingredients", ""), item.get("portion", ""),
-                item.get("desc", ""), item["nutrients_json"], item.get("calories", ""),
-                dates[date], period["name"], location, item["allergens_json"], item["labels_json"], item.get("sort_order", 0)))
+                              (item["name"], station_name, item.get("ingredients", ""), item.get("portion", ""),
+                               item.get("desc", ""), item["nutrients_json"], item.get("calories", ""),
+                               dates[date], period["name"], location, item["allergens_json"], item["labels_json"], item.get("sort_order", 0)))
+
+            for filter in item.get("filters", []):
+                db_cursor.execute("INSERT OR REPLACE INTO menuFilters VALUES (?, ?)", (filter["name"], filter["type"]))
+                db_cursor.execute("INSERT OR REPLACE INTO itemFilterAssociations VALUES (?, ?, ?, ?, ?, ?)",
+                                  (item["name"], location, dates[date], period["name"], station_name, filter["name"]))
 
 def handle_nutrients(db_cursor, item):
     nutrients_list = [{"name": n["name"], "value": n["value"], "uom": n["uom"], "value_numeric": n.get("value_numeric", "")} for n in item.get("nutrients", [])]
-    db_cursor.executemany("INSERT OR REPLACE INTO menuNutrients VALUES (?, ?, ?, ?)", 
-        [(n["name"], n["value"], n["uom"], n["value_numeric"]) for n in item.get("nutrients", [])])
+    db_cursor.executemany("INSERT OR REPLACE INTO menuNutrients VALUES (?, ?, ?, ?)",
+                          [(n["name"], n["value"], n["uom"], n["value_numeric"]) for n in item.get("nutrients", [])])
     return str(nutrients_list)
 
 if __name__ == "__main__":
