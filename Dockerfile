@@ -10,7 +10,7 @@ FROM eclipse-temurin:17-jdk-alpine
 # Install Python, dcron, and SSH
 RUN apk update && \
     apk add python3 py3-pip dcron py3-requests openssh && \
-    pip install cloudscraper fake_useragent && \
+    pip install cloudscraper fake_useragent --break-system-packages && \
     echo "root:Docker!" | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config && \
